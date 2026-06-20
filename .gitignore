@@ -1,0 +1,19 @@
+.DS_Store
+.env
+.env.local
+.venv/
+
+backend/.env
+backend/uploads/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/.pytest_cache/
+*.pyc
+
+frontend/.env.local
+frontend/.next/
+frontend/node_modules/
+frontend/out/
+
+# Legacy local demo artifacts kept out of deployable V1.
+server/
