@@ -1,6 +1,6 @@
 import json
 from collections import Counter
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from uuid import UUID
 
@@ -263,12 +263,21 @@ def submit_review(mistake_id: UUID, payload: ReviewSubmit, db: Session = Depends
 @router.get("/api/dashboard", response_model=DashboardOut)
 def dashboard(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     mistakes = db.scalars(select(Mistake).where(Mistake.user_id == current_user.id)).all()
-    week_start = datetime.utcnow() - timedelta(days=7)
+    week_start_naive = datetime.utcnow() - timedelta(days=7)
+    week_start_aware = datetime.now(timezone.utc) - timedelta(days=7)
     knowledge = Counter([m.main_knowledge_point or "未标记" for m in mistakes])
     reasons = Counter([m.mistake_reason or "未标记" for m in mistakes])
+
+    def is_weekly_new(created_at: datetime | None) -> bool:
+        if not created_at:
+            return False
+        if created_at.tzinfo and created_at.utcoffset():
+            return created_at >= week_start_aware
+        return created_at >= week_start_naive
+
     return DashboardOut(
         total=len(mistakes),
-        weekly_new=len([m for m in mistakes if m.created_at and m.created_at >= week_start]),
+        weekly_new=len([m for m in mistakes if is_weekly_new(m.created_at)]),
         due_today=len([m for m in mistakes if m.next_review_date and m.next_review_date <= date.today() and m.mastery_status != "已掌握"]),
         frequent=len([m for m in mistakes if m.mastery_status == "高频错题"]),
         weak_knowledge=[{"name": name, "count": count} for name, count in knowledge.most_common(5)],
