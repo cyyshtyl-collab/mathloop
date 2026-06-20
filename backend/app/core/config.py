@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 10080
     cors_origins: str = ""
+    frontend_base_url: str | None = None
 
     storage_mode: str = "local"
     upload_dir: str = "uploads"
