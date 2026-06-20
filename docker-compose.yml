@@ -22,8 +22,6 @@ services:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-mathloop}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-mathloop}
     volumes:
       - backend_uploads:/app/uploads
-    ports:
-      - "8000:8000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -38,9 +36,18 @@ services:
       - ./.env
     environment:
       NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
-    ports:
-      - "3000:3000"
     depends_on:
+      - backend
+    restart: unless-stopped
+
+  gateway:
+    image: nginx:1.27-alpine
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "80:80"
+    depends_on:
+      - frontend
       - backend
     restart: unless-stopped
 
