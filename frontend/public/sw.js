@@ -1,4 +1,4 @@
-const CACHE_NAME = "mathloop-junior-v2";
+const CACHE_NAME = "mathloop-junior-v3";
 const APP_SHELL = ["/", "/login", "/register", "/manifest.json", "/icons/icon-192.png", "/icons/icon-512.png"];
 
 self.addEventListener("install", (event) => {
